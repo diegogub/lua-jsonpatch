@@ -1,8 +1,9 @@
 rockspec_format = "3.0"
 package = "lua-jsonpatch"
-version = "0-2"
+version = "0-3"
 source = {
-   url = "https://github.com/diegogub/lua-jsonpatch.git"
+   url = "git://github.com/diegogub/lua-jsonpatch.git",
+   branch = master
 }
 description = {
    summary = "json-patch implementation for lua",
