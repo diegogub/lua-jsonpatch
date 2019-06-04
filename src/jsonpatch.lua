@@ -37,6 +37,25 @@ local ops = {
     }
 }
 
+-- shorter version of actions
+local ops_short = {
+    replace = "rp",
+    add     = "a",
+    remove  = "rm",
+    copy    = "cp",
+    move    = "mv",
+    test    = "t"
+}
+
+local ops_long = {
+    rp = "replace",
+    a = "add",
+    rm = "remove",
+    cp = "copy",
+    mv = "move",
+    t = "test"
+}
+
 -- decode_token , decodes json token
 local decode_token = function(token)
     local t = ""
@@ -131,15 +150,20 @@ local build_patch = function(obj,spec)
     return patch, nil
 end
 
--- shorter version of actions
-local ops_short = {
-    replace = "rp",
-    add     = "a",
-    remove  = "rm",
-    copy    = "cp",
-    move    = "mv",
-    test    = "t"
-}
+
+local make_short_op = function(op) 
+    local so = ops_short[op] 
+    if so == nil then
+        local exist = ops_long[op]
+        if exist then
+            return op,nil
+        else
+            return op,"Invalid op:" .. op
+        end
+    else
+        return so,nil
+    end
+end
 
 -- check_op checks is operation exist, returns boolean and the operation spec
 local check_op = function(op) 
@@ -223,7 +247,11 @@ local follow_path = function(arr,obj,exist)
                 obj = val
             else
                 if val == nil then
-                    return obj,"","Error, key should exist"
+                    if exist then
+                        return obj,"","Error, key should exist"
+                    else
+                        return obj,key,nil
+                    end
                 end
             end
         end
@@ -349,6 +377,81 @@ _M.apply = function(obj,patches)
 
 
     return err
+end
+
+_M.compress = function(patches)
+    local compress_patches= {}
+    for i,p in ipairs(patches) do
+        local ok, clean_patch, err = _M.validate(p)
+        if not ok then
+            return {},"Invalid patch:" .. err
+        end
+
+        local short_op = make_short_op(p.op)
+        local compressed = false
+
+        if short_op == "rp" or short_op == "a" or short_op == "t" then
+            local patch = {short_op,p.path,p.value}
+            table.insert(compress_patches,patch)
+            compressed = true
+        end
+
+        if short_op == "rm" then
+            local patch = {short_op,p.path}
+            table.insert(compress_patches,patch)
+            compressed = true
+        end
+
+        if short_op == "cp"  or short_op == "mv" then
+            local patch = {short_op,p.from,p.path}
+            table.insert(compress_patches,patch)
+            compressed = true
+        end
+
+        if not compressed then
+            return {}, "failed to compress patchs, op not supported"
+        end
+    end
+
+    return compress_patches,nil
+end
+
+_M.decompress = function(patches) 
+    local d_patches = {}
+    for i,p in ipairs(patches) do
+        local patch = {}
+        local op = p[1]
+        local  decompressed = false
+        if op == "rp" or op == "a" or op == "t" then
+            patch["op"] = op
+            patch["path"] = p[2]
+            patch["value"] = p[3]
+            table.insert(d_patches,patch)
+            decompressed = true
+        end
+
+        if op == "rm" then
+            patch["op"] = op
+            patch["path"] = p[2]
+            table.insert(d_patches,patch)
+            decompressed = true
+            decompressed = true
+        end
+
+        if op == "cp" or op == "mv" then
+            patch["op"] = op
+            patch["from"] = p[2]
+            patch["path"] = p[3]
+            table.insert(d_patches,patch)
+            decompressed = true
+        end
+
+        if not decompressed then
+            return {},"Failed to decompress patches"
+        end
+    end
+
+    return d_patches,nil
 end
 
 return _M

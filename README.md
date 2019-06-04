@@ -23,6 +23,9 @@ Usage
 -----
 
 ```
+local jpatch = require "lua-jsonpatch"
+local json = require "json"
+
 local obj = { test = { mypath = "", m = "0"} , arr = { sub = { 0, 1 ,2 ,3 }}}
 local patch = {
     { op = "replace", path = "/test/mypath", value="change it"},
@@ -37,5 +40,16 @@ local patch = {
 local err = jpatch.apply(obj,patch)
 if err then
     print(err)
+end
+
+-- possible to compress size of patches
+local c_patch , err = jpatch.compress(patch)
+if not err then
+    print(json.encode(c_patch))
+end
+
+local d_patch , err = jpatch.decompress(c_patch)
+if not err then
+    print(json.encode(d_patch))
 end
 ```
