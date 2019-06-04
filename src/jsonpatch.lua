@@ -199,7 +199,6 @@ end
 local follow_path = function(arr,obj,exist)
     local key = ""
     for i,k in ipairs(arr) do
-        print("----",k)
         key = k
         if type(key) == "number" then
             if key < 0 then
@@ -288,7 +287,6 @@ local do_mv = function(obj,from,to,copy)
     else
         obj2[key1] = obj1[key1]
 
-        print(">>>>>>",json.encode(obj),json.encode(from))
         local err = do_op("remove",from,obj,"",true)
         if err  then
             return err
