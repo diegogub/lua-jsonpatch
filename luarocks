@@ -1,0 +1,3 @@
+#!/bin/sh
+
+LUAROCKS_SYSCONFDIR='/usr/local/etc/luarocks' LUA_INIT='package.path="/usr/local/share/lua/5.1/?.lua;./?.lua;/usr/local/share/lua/5.1/?/init.lua;/usr/local/lib/lua/5.1/?.lua;/usr/local/lib/lua/5.1/?/init.lua;/Users/diego/.luarocks/share/lua/5.1/?.lua;/Users/diego/.luarocks/share/lua/5.1/?/init.lua";package.cpath="./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so;/Users/diego/.luarocks/lib/lua/5.1/?.so"' exec '/usr/local/bin/lua5.1' '/usr/local/bin/luarocks' --project-tree /Users/diego/Projects/lua-jsonpatch/lua_modules "$@"
