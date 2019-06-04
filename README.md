@@ -11,6 +11,13 @@ Supported Operations / TODO
 - [x] copy / cp
 - [ ] test / t
 
+Install
+-------
+
+```
+    luarocks install lua-jsonpatch
+```
+
 
 Usage
 -----
@@ -31,7 +38,4 @@ local err = jpatch.apply(obj,patch)
 if err then
     print(err)
 end
-
-
-
 ```
