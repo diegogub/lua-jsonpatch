@@ -454,4 +454,99 @@ _M.decompress = function(patches)
     return d_patches,nil
 end
 
+-- filter to apply
+local Filter = {
+    -- path to filter
+    path = "",
+    -- operations
+    ops = {},
+    -- validation types or functions: type, val(value) -> err
+    validate = {}
+}
+
+function Filter:new(path,ops,validates) 
+    local self = {}
+    setmetatable(self, { __index = Filter })
+    self.path = path
+
+    for i,k in ipairs(ops) do
+        local ok, err = check_op(k)
+        if not ok then
+            return self, "invalid op to create filter"
+        end
+    end
+    self.ops = ops
+
+    for i,v in ipairs(validates) do
+        if type(v) == "string" or type(v) == "function" then
+            table.insert(self.validate,v)
+        else
+            return self, "Invalid validation rule"
+        end
+    end
+
+    return self, nil
+end
+
+function Filter:match(patch)
+    local patch_op, _ = make_short_op(patch.op)
+    local match_op = false
+    local match_path = false
+    local valid = false
+
+    if self.path == patch.path then
+        match_path = true
+    end
+
+    for i,f_op in ipairs(self.ops) do
+        local filter_op , _= make_short_op(f_op)
+        if filter_op == patch_op then 
+            match_op = true
+        end
+    end
+
+    for i,v in ipairs(self.validate) do
+        if type(v) == "string" then
+            if type(patch.value) == v then
+                valid = true
+                break
+            end
+        else
+            local err = v(patch.value)
+            if err == nil then
+                valid = true
+                break
+            end
+        end
+    end
+
+    if match_path and match_op and valid then
+        return true
+    else
+        return false
+    end
+end
+
+
+-- filter , filters group of patches.
+_M.filter = function(filters,patches)
+    local filtered = {}
+    for i,p in ipairs(patches) do
+        local valid = false
+        for j,f in ipairs(filters) do
+            local ok = f:match(p)
+
+            print(ok)
+            print(json.encode(p))
+            if ok then
+                table.insert(filtered,p)
+            end
+        end
+    end
+
+    return filtered
+end
+
+_M.Filter = Filter
+
 return _M
