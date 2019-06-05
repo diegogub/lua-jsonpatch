@@ -322,7 +322,7 @@ local do_mv = function(obj,from,to,copy)
     end
 end
 
--- apply, applies a patch to a object, returning new object , patch, and error status
+-- apply, applies a patch to a object, returning error status
 _M.apply = function(obj,patches) 
     if type(obj) ~= "table" then
         return "Patchs can only be applied to tables"
@@ -380,7 +380,7 @@ _M.apply = function(obj,patches)
 end
 
 _M.compress = function(patches)
-    local compress_patches= {}
+    local compress_patches = {}
     for i,p in ipairs(patches) do
         local ok, clean_patch, err = _M.validate(p)
         if not ok then
@@ -493,6 +493,7 @@ function Filter:match(patch)
     local match_op = false
     local match_path = false
     local valid = false
+    local errors = {}
 
     if self.path == patch.path then
         match_path = true
@@ -510,20 +511,24 @@ function Filter:match(patch)
             if type(patch.value) == v then
                 valid = true
                 break
+            else
+                table.insert(errors,"Invalid type:" .. type(patch.value).." for path ".. patch.path)
             end
         else
             local err = v(patch.value)
             if err == nil then
                 valid = true
                 break
+            else
+                table.insert(errors,err)
             end
         end
     end
 
     if match_path and match_op and valid then
-        return true
+        return true,errors
     else
-        return false
+        return false,errors
     end
 end
 
@@ -531,20 +536,22 @@ end
 -- filter , filters group of patches.
 _M.filter = function(filters,patches)
     local filtered = {}
+    local errors = {}
     for i,p in ipairs(patches) do
         local valid = false
         for j,f in ipairs(filters) do
-            local ok = f:match(p)
-
-            print(ok)
-            print(json.encode(p))
+            local ok ,errs = f:match(p)
             if ok then
                 table.insert(filtered,p)
+            end
+
+            for i,e in ipairs(errs) do
+                table.insert(errors,e)
             end
         end
     end
 
-    return filtered
+    return filtered, errors
 end
 
 _M.Filter = Filter
