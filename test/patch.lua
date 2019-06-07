@@ -32,13 +32,18 @@ end
 print(jpatch.validate(d_patch))
 
 local filters = {}
-local fil, err = jpatch.Filter:new("/test/mypath",{"rp","a"},{"string","number"})
+local fil, err = jpatch.Filter:new("/test/mypath",{"rp","a"},{"string","table"})
+print("...",json.encode(fil))
 if not err  then
     table.insert(filters,fil)
 end
 
 -- filter patches
-print(json.encode(jpatch.filter(filters,patch)))
+local patches, errors = jpatch.filter(filters,patch)
+print("...",json.encode(filters))
+print("...Filtered num",#patches)
+print("...Filtered num",#patch)
+print("...",json.encode(errors))
 
 
 

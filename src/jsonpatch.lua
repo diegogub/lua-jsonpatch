@@ -461,52 +461,42 @@ local Filter = {
     -- operations
     ops = {},
     -- validation types or functions: type, val(value) -> err
-    validate = {}
+    v = {},
 }
 
-function Filter:new(path,ops,validates) 
+function Filter:new(path,ops,validators) 
     local self = {}
     setmetatable(self, { __index = Filter })
     self.path = path
+    self.v = {}
 
     for i,k in ipairs(ops) do
         local ok, err = check_op(k)
         if not ok then
-            return self, "invalid op to create filter"
+            return nil, "invalid op to create filter"
         end
     end
     self.ops = ops
 
-    for i,v in ipairs(validates) do
+    for i,v in ipairs(validators) do
         if type(v) == "string" or type(v) == "function" then
-            table.insert(self.validate,v)
+            table.insert(self.v,v)
         else
-            return self, "Invalid validation rule"
+            return nil, "Invalid validation rule"
         end
     end
 
     return self, nil
 end
 
-function Filter:match(patch)
+function Filter:validate(patch)
     local patch_op, _ = make_short_op(patch.op)
     local match_op = false
     local match_path = false
     local valid = false
     local errors = {}
 
-    if self.path == patch.path then
-        match_path = true
-    end
-
-    for i,f_op in ipairs(self.ops) do
-        local filter_op , _= make_short_op(f_op)
-        if filter_op == patch_op then 
-            match_op = true
-        end
-    end
-
-    for i,v in ipairs(self.validate) do
+    for i,v in ipairs(self.v) do
         if type(v) == "string" then
             if type(patch.value) == v then
                 valid = true
@@ -520,12 +510,13 @@ function Filter:match(patch)
                 valid = true
                 break
             else
+                print("inserted",#errors)
                 table.insert(errors,err)
             end
         end
     end
 
-    if match_path and match_op and valid then
+    if valid then
         return true,errors
     else
         return false,errors
@@ -538,16 +529,31 @@ _M.filter = function(filters,patches)
     local filtered = {}
     local errors = {}
     for i,p in ipairs(patches) do
-        local valid = false
+        local valid = true
         for j,f in ipairs(filters) do
-            local ok ,errs = f:match(p)
-            if ok then
-                table.insert(filtered,p)
+            if f.path == p.path then
+                for k,o in ipairs(f.ops) do
+                    local patch_op , _ = make_short_op(p.op)
+                    local fil_op , _= make_short_op(o)
+                    print(fil_op,">>",patch_op)
+                    if patch_op == fil_op then
+                        local ok ,errs = f:validate(p)
+                        if ok then
+                            valid = false
+                        end
+                        for i,e in ipairs(errs) do
+                            table.insert(errors,e)
+                        end
+                    end
+                end
+
             end
 
-            for i,e in ipairs(errs) do
-                table.insert(errors,e)
-            end
+
+        end
+        if valid then
+            print(">>",valid)
+            table.insert(filtered,p)
         end
     end
 
