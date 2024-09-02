@@ -1,0 +1,10 @@
+[
+  {
+    "comment": "remove operation",
+    "doc": { "item1": 1, "item2": 2 },
+    "patch": [
+      { "op": "remove", "path": "/item1" }
+    ],
+    "expected": { "item2": 2 }
+  }
+]

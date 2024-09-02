@@ -1,0 +1,26 @@
+[
+  {
+    "comment": "add to empty object",
+    "doc": {},
+    "patch": [
+      { "op": "add", "path": "/item", "value": 1 }
+    ],
+    "expected": { "item": 1 }
+  },
+  {
+    "comment": "add to array",
+    "doc": { "arr": [1, 2, 3] },
+    "patch": [
+      { "op": "add", "path": "/arr/-", "value": 4 }
+    ],
+    "expected": { "arr": [1, 2, 3, 4] }
+  },
+  {
+    "comment": "add object replacement",
+    "doc": { "parent": { "child1": "value1" } },
+    "patch": [
+      { "op": "add", "path": "/parent", "value": { "child2": "value2" } }
+    ],
+    "expected": { "parent": { "child2": "value2" } }
+  }
+]

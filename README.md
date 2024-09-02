@@ -53,3 +53,11 @@ if not err then
     print(json.encode(d_patch))
 end
 ```
+
+Testing
+-------
+
+```
+luarocks install busted
+busted
+```

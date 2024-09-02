@@ -1,0 +1,26 @@
+[
+  {
+    "comment": "replace existing value",
+    "doc": { "item": 2 },
+    "patch": [
+      { "op": "replace", "path": "/item", "value": 1 }
+    ],
+    "expected": { "item": 1 }
+  },
+  {
+    "comment": "replace in array",
+    "doc": { "arr": [1, 2, 3] },
+    "patch": [
+      { "op": "replace", "path": "/arr/1", "value": 9 }
+    ],
+    "expected": { "arr": [1, 9, 3] }
+  },
+  {
+    "comment": "replace existing object",
+    "doc": { "parent": { "child1": "value1" } },
+    "patch": [
+      { "op": "replace", "path": "/parent", "value": { "child2": "value2" } }
+    ],
+    "expected": { "parent": { "child2": "value2" } }
+  }
+]
