@@ -1,0 +1,18 @@
+[
+  {
+    "comment": "move a value to a new key in the same object",
+    "doc": { "item1": 1, "item2": 2 },
+    "patch": [
+      { "op": "move", "from": "/item1", "path": "/item3" }
+    ],
+    "expected": { "item2": 2, "item3": 1 }
+  },
+  {
+    "comment": "move an object to a new key",
+    "doc": { "parent1": { "child1": "value1" } },
+    "patch": [
+      { "op": "move", "from": "/parent1", "path": "/parent2" }
+    ],
+    "expected": { "parent2": { "child1": "value1" } }
+  }
+]

@@ -242,6 +242,10 @@ local follow_path = function(arr,obj,exist)
                 end
             end
         else
+            if #arr <= i then
+                return obj,key,nil
+            end
+
             local val = obj[key]
             if type(val) == "table" then
                 obj = val
@@ -311,9 +315,9 @@ local do_mv = function(obj,from,to,copy)
     end
 
     if copy then
-        obj2[key1] = obj1[key1]
+        obj2[key2] = obj1[key1]
     else
-        obj2[key1] = obj1[key1]
+        obj2[key2] = obj1[key1]
 
         local err = do_op("remove",from,obj,"",true)
         if err  then

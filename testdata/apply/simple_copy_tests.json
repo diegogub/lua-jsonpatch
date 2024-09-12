@@ -1,0 +1,26 @@
+[
+  {
+    "comment": "copy a value to a new key in the same object",
+    "doc": { "item1": 1, "item2": 2 },
+    "patch": [
+      { "op": "copy", "from": "/item1", "path": "/item3" }
+    ],
+    "expected": { "item1": 1, "item2": 2, "item3": 1 }
+  },
+  {
+    "comment": "copy an object to a new key",
+    "doc": { "parent1": { "child1": "value1" } },
+    "patch": [
+      { "op": "copy", "from": "/parent1", "path": "/parent2" }
+    ],
+    "expected": { "parent1": { "child1": "value1" }, "parent2": { "child1": "value1" } }
+  },
+  {
+    "comment": "copy an array element to a new position",
+    "doc": { "array": [1, 2, 3] },
+    "patch": [
+      { "op": "copy", "from": "/array/1", "path": "/array/3" }
+    ],
+    "expected": { "array": [1, 2, 3, 2] }
+  }
+]
